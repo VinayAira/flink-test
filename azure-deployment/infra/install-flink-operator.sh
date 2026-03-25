@@ -46,7 +46,7 @@ echo ""
 echo "[1/5] Adding Helm repositories..."
 helm repo add jetstack https://charts.jetstack.io
 helm repo add flink-operator-repo \
-  "https://downloads.apache.org/flink/flink-kubernetes-operator-${FLINK_OPERATOR_VERSION}/"
+  "https://archive.apache.org/dist/flink/flink-kubernetes-operator-${FLINK_OPERATOR_VERSION}/"
 helm repo update
 echo "[1/5] Done."
 
@@ -57,9 +57,13 @@ helm template cert-manager jetstack/cert-manager \
   --version "$CERT_MANAGER_VERSION" \
   --set installCRDs=true \
   --set image.registry="${ACR_LOGIN_SERVER}" \
+  --set image.repository="jetstack/cert-manager-controller" \
   --set cainjector.image.registry="${ACR_LOGIN_SERVER}" \
+  --set cainjector.image.repository="jetstack/cert-manager-cainjector" \
   --set webhook.image.registry="${ACR_LOGIN_SERVER}" \
+  --set webhook.image.repository="jetstack/cert-manager-webhook" \
   --set startupapicheck.image.registry="${ACR_LOGIN_SERVER}" \
+  --set startupapicheck.image.repository="jetstack/cert-manager-startupapicheck" \
   > "$TMP_DIR/cert-manager.yaml"
 
 echo "     Applying cert-manager manifests..."
@@ -80,9 +84,11 @@ helm template flink-kubernetes-operator \
   flink-operator-repo/flink-kubernetes-operator \
   --namespace "$OPERATOR_NAMESPACE" \
   --version "$FLINK_OPERATOR_VERSION" \
+  --include-crds \
   --set webhook.create=true \
   --set "watchNamespaces={$FLINK_NAMESPACE}" \
   --set image.repository="${ACR_LOGIN_SERVER}/apache/flink-kubernetes-operator" \
+  --set image.tag="${FLINK_OPERATOR_VERSION}" \
   > "$TMP_DIR/flink-operator.yaml"
 
 echo "     Applying Flink operator manifests..."

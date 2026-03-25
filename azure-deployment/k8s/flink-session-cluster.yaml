@@ -2,7 +2,7 @@ apiVersion: flink.apache.org/v1beta1
 kind: FlinkDeployment
 metadata:
   name: basic-session-cluster
-  namespace: flink
+  namespace: flink-test
 spec:
   image: ${ACR_LOGIN_SERVER}/flink:1.20
   flinkVersion: v1_20
